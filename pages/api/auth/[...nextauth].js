@@ -3,32 +3,12 @@ import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import LinkedInProvider from "next-auth/providers/linkedin";
-// import AppleProvider from "next-auth/providers/apple"
-// import EmailProvider from "next-auth/providers/email"
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
 export default NextAuth({
   // https://next-auth.js.org/configuration/providers
   providers: [
-    /* EmailProvider({
-         server: process.env.EMAIL_SERVER,
-         from: process.env.EMAIL_FROM,
-       }),
-    // Temporarily removing the Apple provider from the demo site as the
-    // callback URL for it needs updating due to Vercel changing domains
-      
-    Providers.Apple({
-      clientId: process.env.APPLE_ID,
-      clientSecret: {
-        appleId: process.env.APPLE_ID,
-        teamId: process.env.APPLE_TEAM_ID,
-        privateKey: process.env.APPLE_PRIVATE_KEY,
-        keyId: process.env.APPLE_KEY_ID,
-      },
-    }),
-    */
-
     GithubProvider({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
@@ -56,8 +36,8 @@ export default NextAuth({
       },
       async authorize(credentials, req) {
         // Add logic here to look up the user from the credentials supplied
-        // 1-database check or
-        // 2-check api
+        // منطق برای سنجش و اعتبار کاربر به روش های زیر
+        // 1-check api
         // try {
         //   const user = await axios.post('https://myapi.com/login',
         //   {
@@ -81,7 +61,7 @@ export default NextAuth({
         //   // Redirecting to the login page with error message          in the URL
         //   throw new Error(errorMessage + '&email=' + credentials.email)
         // }
-        // 3-example
+        // 2-example
         const user = { id: 1, name: "Smith", email: "jsmith@example.com" };
         if (credentials.email === "jsmith@example.com" && credentials.password === "test74") {
           // Any object returned will be saved in `user` property of the JWT

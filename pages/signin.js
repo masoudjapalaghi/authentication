@@ -22,7 +22,7 @@ export default function SignIn({ providers, csrfToken }) {
     signIn("credentials", {
       email,
       password,
-      callbackUrl: `${window.location.origin}/welcome`,
+      callbackUrl: `${window.location.origin}/`,
     });
   };
   return (
