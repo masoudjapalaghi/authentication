@@ -7,6 +7,8 @@ import styles from "./header.module.css"
 // rendering, and avoids any flash incorrect content on initial page load.
 export default function Header() {
   const { data: session, status } = useSession()
+  // console.log(session);
+  // console.log(status)
   const loading = status === "loading"
 
   return (
@@ -25,8 +27,8 @@ export default function Header() {
               <span className={styles.notSignedInText}>
                 You are not signed in
               </span>
-              <a
-                href={`/api/auth/signin`}
+              <span
+                // href={`/api/auth/signin`}
                 className={styles.buttonPrimary}
                 onClick={(e) => {
                   e.preventDefault()
@@ -34,17 +36,17 @@ export default function Header() {
                 }}
               >
                 Sign in
-              </a>
+              </span>
             </>
           )}
           {session && (
             <>
-              {session.user.image && (
+              {session.user.image ? (
                 <span
                   style={{ backgroundImage: `url('${session.user.image}')` }}
                   className={styles.avatar}
                 />
-              )}
+              ):""}
               <span className={styles.signedInText}>
                 <small>Signed in as</small>
                 <br />
