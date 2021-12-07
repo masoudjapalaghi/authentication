@@ -18,11 +18,12 @@ export default function SignIn({ providers, csrfToken }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
+    // debugger
     setIsLoginStarted(true);
     signIn("credentials", {
       email,
       password,
-      callbackUrl: `${window.location.origin}/welcome`,
+      callbackUrl: `${window.location.origin}/`,
     });
   };
   return (
@@ -71,7 +72,7 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  console.log(`req:${req}& res:${res}`, context);
+  // console.log(`req:${req}& res:${res}`, context);
   const providers = await getProviders(context);
   const csrfToken = await getCsrfToken(context);
   return {

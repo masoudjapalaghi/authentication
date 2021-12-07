@@ -3,6 +3,9 @@ import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import LinkedInProvider from "next-auth/providers/linkedin";
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
+import clientPromise from "../../../lib/mongodb";
+import axios from "axios";
 // import AppleProvider from "next-auth/providers/apple"
 // import EmailProvider from "next-auth/providers/email"
 
@@ -11,24 +14,6 @@ import LinkedInProvider from "next-auth/providers/linkedin";
 export default NextAuth({
   // https://next-auth.js.org/configuration/providers
   providers: [
-    /* EmailProvider({
-         server: process.env.EMAIL_SERVER,
-         from: process.env.EMAIL_FROM,
-       }),
-    // Temporarily removing the Apple provider from the demo site as the
-    // callback URL for it needs updating due to Vercel changing domains
-      
-    Providers.Apple({
-      clientId: process.env.APPLE_ID,
-      clientSecret: {
-        appleId: process.env.APPLE_ID,
-        teamId: process.env.APPLE_TEAM_ID,
-        privateKey: process.env.APPLE_PRIVATE_KEY,
-        keyId: process.env.APPLE_KEY_ID,
-      },
-    }),
-    */
-
     GithubProvider({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
@@ -50,16 +35,13 @@ export default NextAuth({
       // You can specify whatever fields you are expecting to be submitted.
       // e.g. domain, username, password, 2FA token, etc.
       // You can pass any HTML attribute to the <input> tag through the object.
-      credentials: {
-        username: { label: "Username", type: "email", placeholder: "jsmith" },
-        password: { label: "Password", type: "password" },
-      },
+      // credentials: {
+      //   username: { label: "Username", type: "email", placeholder: "jsmith" },
+      //   password: { label: "Password", type: "password" },
+      // },
       async authorize(credentials, req) {
-        // Add logic here to look up the user from the credentials supplied
-        // 1-database check or
-        // 2-check api
         // try {
-        //   const user = await axios.post('https://myapi.com/login',
+        //   const user = await axios.post('https://619cadc168ebaa001753cabe.mockapi.io/users',
         //   {
         //     user: {
         //       password: credentials.password,
@@ -72,45 +54,60 @@ export default NextAuth({
         //       'Content-Type': 'application/json'
         //     }
         //   })
-  
+
         //   if (user) {
         //     return {status: 'success', data: user}
-        //   } 
+        //   }
         // } catch (e) {
         //   const errorMessage = e.response.data.message
         //   // Redirecting to the login page with error message          in the URL
         //   throw new Error(errorMessage + '&email=' + credentials.email)
         // }
-        // 3-example
-        const user = { id: 1, name: "Smith", email: "jsmith@example.com" };
-        if (credentials.email === "jsmith@example.com" && credentials.password === "test74") {
-          // Any object returned will be saved in `user` property of the JWT
+        const res = await fetch("https://619cadc168ebaa001753cabe.mockapi.io/users", {
+          method: "POST",
+          body: JSON.stringify(credentials),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const user = await res.json();
+
+        // const user = { id: '1', name: 'Suat Bayrak', email: 'test@test.com2' };
+
+        if (user) {
           return user;
         } else {
-          // If you return null or false then the credentials will be rejected
           return null;
-          // You can also Reject this callback with an Error or with a URL:
-          // throw new Error('error message') // Redirect to error page
-          // throw '/path/to/redirect'        // Redirect to a URL
         }
       },
+      // adapter: MongoDBAdapter(clientPromise),
     }),
   ],
+
   // database: process.env.DATABASE_URL,
   // The secret should be set to a reasonably long random string.
   // It is used to sign cookies and to sign and encrypt JSON Web Tokens, unless
   // a separate secret is defined explicitly for encrypting the JWT.
   secret: process.env.SECRET,
-
+  // callbacks: {
+  //   async session(session, token) {
+  //     console.log(session)
+  //     session.user = token.user;
+  //     return session;
+  //   },
+  //   async jwt(token, user) {
+  //     if (user) token.user = user;
+  //     return token;
+  //   },
+  // },
   session: {
+    // jwt: true,
+    // maxAge: 30 * 24 * 60 * 60,
+    // updateAge: 24 * 60 * 60,
     // Use JSON Web Tokens for session instead of database sessions.
     // This option can be used with or without a database for users/accounts.
     // Note: `strategy` should be set to 'jwt' if no database is used.
-    strategy: "jwt",
-
     // Seconds - How long until an idle session expires and is no longer valid.
-    // maxAge: 30 * 24 * 60 * 60, // 30 days
-
     // Seconds - Throttle how frequently to write to database to extend a session.
     // Use it to limit write operations. Set to 0 to always update the database.
     // Note: This option is ignored if using JSON Web Tokens
@@ -150,8 +147,8 @@ export default NextAuth({
   callbacks: {
     // async signIn({ user, account, profile, email, credentials }) { return true },
     // async redirect({ url, baseUrl }) { return baseUrl },
-    // async session({ session, token, user }) { return session },
-    // async jwt({ token, user, account, profile, isNewUser }) { return token }
+    // async session({ session, token, user }) {},
+    // async jwt({ token, user, account, profile, isNewUser }) {},
   },
 
   // Events are useful for logging
@@ -163,7 +160,6 @@ export default NextAuth({
   theme: {
     colorScheme: "light",
   },
-
   // Enable debug messages in the console if you are having problems
-  debug: false,
+  debug: true,
 });
