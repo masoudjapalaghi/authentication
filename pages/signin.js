@@ -1,6 +1,7 @@
 import { useSession, getSession, getProviders, signIn, getCsrfToken } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Signup from "./signup";
 
 export default function SignIn({ providers, csrfToken }) {
   const [email, setEmail] = useState("");
@@ -26,6 +27,7 @@ export default function SignIn({ providers, csrfToken }) {
       callbackUrl: `${window.location.origin}/`,
     });
   };
+  console.log(providers)
   return (
     <>
       {Object.values(providers).map((provider) => (
@@ -48,7 +50,7 @@ export default function SignIn({ providers, csrfToken }) {
       </form> */}
       <form onSubmit={(e) => handleLogin(e)} >
         <label htmlFor="loginEmail">Email</label>
-        <input id="loginEmail" type="email" value={email} onChange={(e) => setEmail(e.target.value)}  />
+        <input id="loginEmail" type="text" value={email} onChange={(e) => setEmail(e.target.value)}  />
         <span >{loginError}</span>
         <label htmlFor="inputPassword">Password</label>
         <input id="inputPassword" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -56,6 +58,8 @@ export default function SignIn({ providers, csrfToken }) {
           Log In
         </button>
       </form>
+      <hr/>
+      <Signup/>
     </>
   );
 }
@@ -73,8 +77,8 @@ export async function getServerSideProps(context) {
     };
   }
   // console.log(`req:${req}& res:${res}`, context);
-  const providers = await getProviders(context);
-  const csrfToken = await getCsrfToken(context);
+  const providers = await getProviders();
+  const csrfToken = await getCsrfToken({req});
   return {
     props: { providers, csrfToken },
   };

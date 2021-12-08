@@ -27,6 +27,7 @@ export default NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_SECRET,
+      scope: "read:user",
     }),
     CredentialsProvider({
       // The name to display on the sign in form (e.g. 'Sign in with...')
@@ -40,40 +41,12 @@ export default NextAuth({
       //   password: { label: "Password", type: "password" },
       // },
       async authorize(credentials, req) {
-        // try {
-        //   const user = await axios.post('https://619cadc168ebaa001753cabe.mockapi.io/users',
-        //   {
-        //     user: {
-        //       password: credentials.password,
-        //       email: credentials.email
-        //     }
-        //   },
-        //   {
-        //     headers: {
-        //       accept: '*/*',
-        //       'Content-Type': 'application/json'
-        //     }
-        //   })
-
-        //   if (user) {
-        //     return {status: 'success', data: user}
-        //   }
-        // } catch (e) {
-        //   const errorMessage = e.response.data.message
-        //   // Redirecting to the login page with error message          in the URL
-        //   throw new Error(errorMessage + '&email=' + credentials.email)
-        // }
-
         const res = await axios.post(`http://185.211.58.22:8082/api/v1/Users/Login?mobileOrEmail=${credentials.email}&pass=${credentials.password}&Captcha=9`, {
-          // body: JSON.stringify(credentials),
           headers: {
             "Content-Type": "application/json",
           },
         });
-        const user = {name:res.data.userId,email:res.data.userName,image:""};
-
-        // const user = { id: '1', name: 'Suat Bayrak', email: 'test@test.com2' };
-
+        const user = { name: res.data.userId, email: res.data.userName, image: "", access_token: res.data.access_token };
         if (user) {
           return user;
         } else {
@@ -84,22 +57,34 @@ export default NextAuth({
     }),
   ],
 
+  callbacks: {
+    // async signIn({ user, account, profile, email, credentials }) { return true },
+    // async redirect({ url, baseUrl }) { return baseUrl },
+    async jwt({ token, user }) {
+      // console.log('token::::',token)
+      // console.log('user::::',user)
+      if (user) {
+        token.jwt = user.jwt;
+        token.access_token = user.access_token;
+        token.user = user.user;
+        token.accessToken = user?.accessToken;
+      }
+      return Promise.resolve(token);
+    },
+    async session({ session, token, user }) {
+      console.log(token);
+      session.jwt = token.jwt;
+      session.access_token = token.access_token;
+      session.accessToken = token.accessToken ? token.accessToken : (session.user = token.user ? token.user : session.user);
+      return Promise.resolve(session);
+    },
+  },
   // database: process.env.DATABASE_URL,
   // The secret should be set to a reasonably long random string.
   // It is used to sign cookies and to sign and encrypt JSON Web Tokens, unless
   // a separate secret is defined explicitly for encrypting the JWT.
   secret: process.env.SECRET,
-  // callbacks: {
-  //   async session(session, token) {
-  //     console.log(session)
-  //     session.user = token.user;
-  //     return session;
-  //   },
-  //   async jwt(token, user) {
-  //     if (user) token.user = user;
-  //     return token;
-  //   },
-  // },
+
   session: {
     jwt: true,
     // maxAge: 30 * 24 * 60 * 60,
@@ -134,7 +119,7 @@ export default NextAuth({
   // pages is not specified for that route.
   // https://next-auth.js.org/configuration/pages
   pages: {
-    signIn: "/signin", // Displays signin buttons
+    // signIn: "/signin", // Displays signin buttons
     // signOut: '/auth/signout', // Displays form with sign out button
     // error: '/auth/error', // Error code passed in query string as ?error=
     // verifyRequest: '/auth/verify-request', // Used for check email page
@@ -144,26 +129,6 @@ export default NextAuth({
   // Callbacks are asynchronous functions you can use to control what happens
   // when an action is performed.
   // https://next-auth.js.org/configuration/callbacks
-  callbacks: {
-    // async signIn({ user, account, profile, email, credentials }) { return true },
-    // async redirect({ url, baseUrl }) { return baseUrl },
-  //   async jwt({ token, user}) {
-  //     console.log('token::::',token)
-  //     console.log('user::::',user)
-  //       if (user) {
-  //         token.jwt = user.jwt;
-  //         token.user = user.user;
-  //         token.accessToken = user?.accessToken;
-  //       }
-  //       return Promise.resolve(token);
-  //   },
-  //   async session({ session, token }) {
-  //     session.jwt = token.jwt;
-  //     session.accessToken = token.accessToken ? token.accessToken :
-  //     session.user = token.user ? token.user : session.user; 
-  //     return Promise.resolve(session);
-  //   },
-  },
 
   // Events are useful for logging
   // https://next-auth.js.org/configuration/events
