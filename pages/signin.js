@@ -27,14 +27,18 @@ export default function SignIn({ providers, csrfToken }) {
       callbackUrl: `${window.location.origin}/`,
     });
   };
-  console.log(providers)
   return (
     <>
-      {Object.values(providers).map((provider) => (
-        <div key={provider.name}>
-          <button onClick={() => signIn(provider.id)}>Sign in with {provider.name}</button>
-        </div>
-      ))}
+      {Object.values(providers).map((provider) => {
+        if (provider.name === "Credentials") {
+          return;
+        }
+        return (
+          <div key={provider.name}>
+            <button onClick={() => signIn(provider.id)}>Sign in with {provider.name}</button>
+          </div>
+        );
+      })}
       <br />
       {/* <form method="post" action="/api/auth/callback/credentials">
         <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
@@ -48,18 +52,18 @@ export default function SignIn({ providers, csrfToken }) {
         </label>
         <button type="submit">Sign in</button>
       </form> */}
-      <form onSubmit={(e) => handleLogin(e)} >
+      <form onSubmit={(e) => handleLogin(e)}>
         <label htmlFor="loginEmail">Email</label>
-        <input id="loginEmail" type="text" value={email} onChange={(e) => setEmail(e.target.value)}  />
-        <span >{loginError}</span>
+        <input id="loginEmail" type="text" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <span>{loginError}</span>
         <label htmlFor="inputPassword">Password</label>
         <input id="inputPassword" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button type="submit" disabled={isLoginStarted} >
+        <button type="submit" disabled={isLoginStarted}>
           Log In
         </button>
       </form>
-      <hr/>
-      <Signup/>
+      <hr />
+      <Signup />
     </>
   );
 }
@@ -78,7 +82,7 @@ export async function getServerSideProps(context) {
   }
   // console.log(`req:${req}& res:${res}`, context);
   const providers = await getProviders();
-  const csrfToken = await getCsrfToken({req});
+  const csrfToken = await getCsrfToken({ req });
   return {
     props: { providers, csrfToken },
   };
