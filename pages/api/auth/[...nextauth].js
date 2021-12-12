@@ -4,6 +4,8 @@ import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import LinkedInProvider from "next-auth/providers/linkedin";
 import axios from "axios";
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
+import clientPromise from "../../../lib/mongodb";
 // import AppleProvider from "next-auth/providers/apple"
 // import EmailProvider from "next-auth/providers/email"
 
@@ -11,6 +13,7 @@ import axios from "axios";
 // https://next-auth.js.org/configuration/options
 export default NextAuth({
   // https://next-auth.js.org/configuration/providers
+  // adapter: MongoDBAdapter(clientPromise),
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID,
@@ -51,7 +54,7 @@ export default NextAuth({
       },
     }),
   ],
-
+  
   callbacks: {
     async jwt({ token, user }) {
       // console.log("user:::",user)
@@ -70,6 +73,22 @@ export default NextAuth({
       // session.accessToken = token.accessToken ? token.accessToken : (session.user = token.user ? token.user : session.user);
       return Promise.resolve(session);
     },
+    async signIn({ user, account, profile, email, credentials }) {
+      console.log("user:",user)
+      console.log("account:",account)
+      console.log("profile:",profile)
+      console.log("email:",email)
+      console.log("credentials:",credentials)
+      const isAllowedToSignIn = true
+      if (isAllowedToSignIn) {
+        return true
+      } else {
+        // Return false to display a default error message
+        return false
+        // Or you can return a URL to redirect to:
+        // return '/unauthorized'
+      }
+    }
   },
   secret: process.env.SECRET,
 
@@ -78,7 +97,7 @@ export default NextAuth({
   },
 
   jwt: {
-    encryption:true,
+    // encryption:true,
     secret: process.env.SECRET,
   },
 
